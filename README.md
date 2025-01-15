@@ -20,7 +20,9 @@ You may also install this extension by going to the [releases page](https://gith
 
 ## Usage
 
-TODO
+There will be a new window available in the CodeBrowser toolbar. This window can be opened by clicking on `Window` > `Invalid Memory References`. The window will list all invalid memory references.
+
+![Usage example animation](doc/usage.gif)
 
 
 ## Development
