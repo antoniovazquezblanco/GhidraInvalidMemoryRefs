@@ -15,102 +15,105 @@
  */
 package ghidrainvalidmemoryrefs;
 
-import java.awt.BorderLayout;
-
-import javax.swing.*;
-
-import docking.ActionContext;
-import docking.ComponentProvider;
-import docking.action.DockingAction;
-import docking.action.ToolBarData;
-import ghidra.app.ExamplesPluginPackage;
+import ghidra.app.CorePluginPackage;
+import ghidra.app.events.ProgramLocationPluginEvent;
 import ghidra.app.plugin.PluginCategoryNames;
 import ghidra.app.plugin.ProgramPlugin;
-import ghidra.framework.plugintool.*;
+import ghidra.app.services.GoToService;
+import ghidra.framework.model.DomainObjectChangedEvent;
+import ghidra.framework.model.DomainObjectListener;
+import ghidra.framework.plugintool.PluginInfo;
+import ghidra.framework.plugintool.PluginTool;
 import ghidra.framework.plugintool.util.PluginStatus;
-import ghidra.util.HelpLocation;
-import ghidra.util.Msg;
-import resources.Icons;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.listing.Program;
+import ghidra.program.util.ProgramLocation;
 
 /**
- * Provide class-level documentation that describes what this plugin does.
+ * <CODE>GhidraInvalidMemoryRefsPlugin</CODE> displays a list of invalid memory
+ * references all across a program. This is useful when reversing firmware or
+ * drivers for determining memory mappings.
  */
 //@formatter:off
 @PluginInfo(
 	status = PluginStatus.STABLE,
-	packageName = ExamplesPluginPackage.NAME,
-	category = PluginCategoryNames.EXAMPLES,
-	shortDescription = "Plugin short description goes here.",
-	description = "Plugin long description goes here."
+	packageName = CorePluginPackage.NAME,
+	category = PluginCategoryNames.COMMON,
+	shortDescription = "Invalid memory references view",
+	description = "List any references to undefined memory addresses.",
+	servicesRequired = { GoToService.class },
+	eventsProduced = { ProgramLocationPluginEvent.class }
 )
 //@formatter:on
-public class GhidraInvalidMemoryRefsPlugin extends ProgramPlugin {
+public class GhidraInvalidMemoryRefsPlugin extends ProgramPlugin implements DomainObjectListener {
 
-	MyProvider provider;
+	private InvalidMemoryRefsProvider provider;
+	private GoToService goToService;
 
-	/**
-	 * Plugin constructor.
-	 * 
-	 * @param tool The plugin tool that this plugin is added to.
-	 */
 	public GhidraInvalidMemoryRefsPlugin(PluginTool tool) {
 		super(tool);
 
-		// Customize provider (or remove if a provider is not desired)
-		String pluginName = getName();
-		provider = new MyProvider(this, pluginName);
-
-		// Customize help (or remove if help is not desired)
-		String topicName = this.getClass().getPackage().getName();
-		String anchorName = "HelpAnchor";
-		provider.setHelpLocation(new HelpLocation(topicName, anchorName));
+		provider = new InvalidMemoryRefsProvider(this);
 	}
 
 	@Override
-	public void init() {
-		super.init();
-
-		// Acquire services if necessary
-	}
-
-	// If provider is desired, it is recommended to move it to its own file
-	private static class MyProvider extends ComponentProvider {
-
-		private JPanel panel;
-		private DockingAction action;
-
-		public MyProvider(Plugin plugin, String owner) {
-			super(plugin.getTool(), owner, owner);
-			buildPanel();
-			createActions();
-		}
-
-		// Customize GUI
-		private void buildPanel() {
-			panel = new JPanel(new BorderLayout());
-			JTextArea textArea = new JTextArea(5, 25);
-			textArea.setEditable(false);
-			panel.add(new JScrollPane(textArea));
-			setVisible(true);
-		}
-
-		// Customize actions
-		private void createActions() {
-			action = new DockingAction("My Action", getName()) {
-				@Override
-				public void actionPerformed(ActionContext context) {
-					Msg.showInfo(getClass(), panel, "Custom Action", "Hello!");
-				}
-			};
-			action.setToolBarData(new ToolBarData(Icons.ADD_ICON, null));
-			action.setEnabled(true);
-			action.markHelpUnnecessary();
-			dockingTool.addLocalAction(this, action);
-		}
-
-		@Override
-		public JComponent getComponent() {
-			return panel;
+	protected void init() {
+		goToService = tool.getService(GoToService.class);
+		if (currentProgram != null) {
+			programActivated(currentProgram);
 		}
 	}
+
+	/**
+	 * Subclass should override this method if it is interested in open program
+	 * events.
+	 */
+	@Override
+	protected void programActivated(Program program) {
+		program.addListener(this);
+		provider.setProgram(program);
+	}
+
+	/**
+	 * Subclass should override this method if it is interested in close program
+	 * events.
+	 */
+	@Override
+	protected void programDeactivated(Program program) {
+		program.removeListener(this);
+		provider.setProgram(null);
+	}
+
+	/**
+	 * This is the callback method for DomainObjectChangedEvents.
+	 */
+	@Override
+	public void domainObjectChanged(DomainObjectChangedEvent ev) {
+		if (provider == null || !provider.isVisible()) {
+			return;
+		}
+		// TODO: Notify the provider to update...
+	}
+
+	/**
+	 * Called when a memory location line is selected in the IvalidMemoryRefsDialog.
+	 */
+	void invalidRefSelected(Address addr) {
+		ProgramLocation loc = new ProgramLocation(currentProgram, addr);
+		goToService.goTo(loc);
+	}
+
+	/**
+	 * Tells a plugin that it is no longer needed. The plugin should remove itself
+	 * from anything that it is registered to and release any resources.
+	 */
+	@Override
+	public void dispose() {
+		if (currentProgram != null) {
+			currentProgram.removeListener(this);
+			currentProgram = null;
+		}
+		super.dispose();
+	}
+
 }
