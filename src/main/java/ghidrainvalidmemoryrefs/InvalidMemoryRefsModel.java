@@ -31,14 +31,16 @@ public class InvalidMemoryRefsModel extends AbstractGTableModel<Reference> imple
 
 	private void updateModelData() {
 		rowDataList = new ArrayList<>();
-		InstructionIterator instrIter = program.getListing().getInstructions(true);
-		while (instrIter.hasNext()) {
-			Instruction instr = instrIter.next();
-			Reference[] refs = instr.getReferencesFrom();
-			for (Reference ref : refs) {
-				Address dest = ref.getToAddress();
-				if (!program.getMemory().contains(dest) && !dest.isStackAddress()) {
-					rowDataList.add(ref);
+		if (program != null) {
+			InstructionIterator instrIter = program.getListing().getInstructions(true);
+			while (instrIter.hasNext()) {
+				Instruction instr = instrIter.next();
+				Reference[] refs = instr.getReferencesFrom();
+				for (Reference ref : refs) {
+					Address dest = ref.getToAddress();
+					if (!program.getMemory().contains(dest) && !dest.isStackAddress()) {
+						rowDataList.add(ref);
+					}
 				}
 			}
 		}
@@ -47,7 +49,7 @@ public class InvalidMemoryRefsModel extends AbstractGTableModel<Reference> imple
 
 	void setProgram(Program program) {
 		this.program = program;
-		this.funcMgr = program.getFunctionManager();
+		this.funcMgr = (program != null) ? program.getFunctionManager() : null;
 		updateModelData();
 	}
 
