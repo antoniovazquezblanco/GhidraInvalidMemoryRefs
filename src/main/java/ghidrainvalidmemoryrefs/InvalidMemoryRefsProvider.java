@@ -19,6 +19,7 @@ public class InvalidMemoryRefsProvider extends ComponentProviderAdapter {
 
 	private JPanel mainPanel;
 	private InvalidMemoryRefsModel tableModel;
+	private GTableFilterPanel<Reference> filterPanel;
 
 	public InvalidMemoryRefsProvider(GhidraInvalidMemoryRefsPlugin plugin) {
 		super(plugin.getTool(), "Invalid Memory References", plugin.getName(), ProgramActionContext.class);
@@ -31,9 +32,14 @@ public class InvalidMemoryRefsProvider extends ComponentProviderAdapter {
 
 	private JPanel buildMainPanel() {
 		JPanel memPanel = new JPanel(new BorderLayout());
+
 		tableModel = new InvalidMemoryRefsModel();
+
 		GhidraTable table = new GhidraTable(tableModel);
-		GTableFilterPanel<Reference> filterPanel = new GhidraTableFilterPanel<>(table, tableModel);
+		table.setActionsEnabled(true);
+		table.installNavigation(tool);
+
+		filterPanel = new GhidraTableFilterPanel<>(table, tableModel);
 
 		memPanel.add(new JScrollPane(table), BorderLayout.CENTER);
 		memPanel.add(filterPanel, BorderLayout.SOUTH);
@@ -48,5 +54,11 @@ public class InvalidMemoryRefsProvider extends ComponentProviderAdapter {
 
 	public void setProgram(Program program) {
 		tableModel.setProgram(program);
+	}
+
+	void dispose() {
+		removeFromTool();
+		filterPanel.dispose();
+		tool = null;
 	}
 }

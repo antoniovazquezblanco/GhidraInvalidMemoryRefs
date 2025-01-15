@@ -109,6 +109,10 @@ public class GhidraInvalidMemoryRefsPlugin extends ProgramPlugin implements Doma
 	 */
 	@Override
 	public void dispose() {
+		if (provider != null) {
+			provider.dispose();
+			provider = null;
+		}
 		if (currentProgram != null) {
 			currentProgram.removeListener(this);
 			currentProgram = null;
