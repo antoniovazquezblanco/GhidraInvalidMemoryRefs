@@ -90,13 +90,13 @@ public class InvalidMemoryRefsModel extends AbstractGTableModel<Reference> imple
 
 	@Override
 	public ProgramLocation getProgramLocation(int modelRow, int modelColumn) {
-		// TODO Auto-generated method stub
-		return null;
+		Reference ref = getRowObject(modelRow);
+		Address addr = ref.getFromAddress();
+		return new ProgramLocation(program, addr);
 	}
 
 	@Override
 	public ProgramSelection getProgramSelection(int[] modelRows) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
