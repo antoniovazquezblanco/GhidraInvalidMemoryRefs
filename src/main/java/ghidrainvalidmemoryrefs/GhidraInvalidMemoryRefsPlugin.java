@@ -36,7 +36,7 @@ import ghidra.program.util.ProgramLocation;
  */
 //@formatter:off
 @PluginInfo(
-	status = PluginStatus.STABLE,
+	status = PluginStatus.RELEASED,
 	packageName = CorePluginPackage.NAME,
 	category = PluginCategoryNames.COMMON,
 	shortDescription = "Invalid memory references view",
