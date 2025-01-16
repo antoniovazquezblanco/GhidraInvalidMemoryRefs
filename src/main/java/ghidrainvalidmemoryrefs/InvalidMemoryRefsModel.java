@@ -3,7 +3,7 @@ package ghidrainvalidmemoryrefs;
 import java.util.ArrayList;
 import java.util.List;
 
-import docking.widgets.table.AbstractGTableModel;
+import docking.widgets.table.AbstractSortedTableModel;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.Function;
 import ghidra.program.model.listing.FunctionManager;
@@ -15,7 +15,7 @@ import ghidra.program.util.ProgramLocation;
 import ghidra.program.util.ProgramSelection;
 import ghidra.util.table.ProgramTableModel;
 
-public class InvalidMemoryRefsModel extends AbstractGTableModel<Reference> implements ProgramTableModel {
+public class InvalidMemoryRefsModel extends AbstractSortedTableModel<Reference> implements ProgramTableModel {
 
 	private List<ReferenceCol> columns = new ArrayList<>();
 	private List<Reference> rowDataList = new ArrayList<>();
@@ -86,6 +86,11 @@ public class InvalidMemoryRefsModel extends AbstractGTableModel<Reference> imple
 	@Override
 	public Object getColumnValueForRow(Reference t, int columnIndex) {
 		return columns.get(columnIndex).getValueForRow(rowDataList, t);
+	}
+
+	@Override
+	public boolean isSortable(int columnIndex) {
+		return true;
 	}
 
 	@Override
