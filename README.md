@@ -1,6 +1,7 @@
 # Ghidra Invalid Memory Refs
 
 [![Build](https://github.com/antoniovazquezblanco/GhidraInvalidMemoryRefs/actions/workflows/main.yml/badge.svg)](https://github.com/antoniovazquezblanco/GhidraInvalidMemoryRefs/actions/workflows/main.yml)
+[![CodeQL](https://github.com/antoniovazquezblanco/GhidraInvalidMemoryRefs/actions/workflows/codeql.yml/badge.svg)](https://github.com/antoniovazquezblanco/GhidraExtensionManager/actions/workflows/codeql.yml)
 
 <p align="center">
   <img width="400" src="doc/logo.png" alt="A red dragon fails to burn some coastline houses. Fire still burns on top of the water.">
